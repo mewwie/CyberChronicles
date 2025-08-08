@@ -1,0 +1,19 @@
+This file explains the purpose of the key files in this project.
+
+- `backend/app.py`:
+  This is the main Flask application file. It defines the web server and handles incoming API requests. It has one primary endpoint, `/redact`, which accepts text or file uploads and uses the `redactor` module to perform PII redaction. It also serves the redacted files for download.
+
+- `backend/redactor.py`:
+  This file contains the core PII redaction logic. The main function, `redact_text`, takes a string and an options dictionary. It uses a combination of regular expressions (for patterns like emails, phone numbers) and a spaCy NLP model (for named entities like people and places) to find and redact sensitive information. It is designed to be extensible.
+
+- `backend/requirements.txt`:
+  This file lists the Python dependencies required for the backend to run, such as Flask and spaCy. It can be used by pip to install all necessary libraries.
+
+- `frontend/index.html`:
+  The main HTML file for the user interface. It provides two forms for users to submit either raw text or a file (`.txt`, `.pdf`) for redaction.
+
+- `frontend/app.js`:
+  This JavaScript file contains the logic for the frontend. It handles the form submissions, sends the data to the backend API, and displays the result (either the redacted text or a download link for the redacted file) on the page.
+
+- `README.md`:
+  The main project documentation. It contains instructions on how to set up, run, and deploy the application, as well as example Git commands for repository management.

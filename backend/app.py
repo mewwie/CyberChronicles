@@ -50,66 +50,57 @@ def extract_text_from_pdf(filepath):
 @app.route('/redact', methods=['POST'])
 def handle_redact():
     """Verwerkt redactieverzoeken voor tekst en bestanden."""
-    # Controleer op tekstinvoer
-    if 'text' in request.form:
-        text = request.form.get('text')
-        if not text:
-            return jsonify({'error': 'Text field cannot be empty.'}), 400
+    options = {
+        'mode': request.form.get('mode', 'replace'),
+        'mask_char': request.form.get('mask_char', 'X'),
+    }
 
-        redacted_text = redact_text(text)
+    # Handle text input
+    if 'text' in request.form and request.form.get('text'):
+        text = request.form.get('text')
+        redacted_text = redact_text(text, options=options)
         return jsonify({'redacted': redacted_text})
 
-    # Controleer op bestandsinvoer
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request.'}), 400
+    # Handle file input
+    if 'file' in request.files and request.files['file'].filename != '':
+        file = request.files['file']
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'File type not allowed.'}), 400
 
-    file = request.files['file']
-
-    if file.filename == '':
-        return jsonify({'error': 'No selected file.'}), 400
-
-    if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(upload_path)
 
         try:
-            # Extraheer tekst
             if filename.lower().endswith('.txt'):
                 with open(upload_path, 'r', encoding='utf-8') as f:
                     original_text = f.read()
             elif filename.lower().endswith('.pdf'):
                 original_text = extract_text_from_pdf(upload_path)
             else:
-                original_text = "" # Should not happen
+                # Should be unreachable due to allowed_file check
+                return jsonify({'error': 'Internal error: unexpected file type.'}), 500
 
-            # Redigeer tekst
-            redacted_text = redact_text(original_text)
+            redacted_text = redact_text(original_text, options=options)
 
-            # Sla geredigeerde tekst op in een nieuw bestand
             redacted_filename = f"redacted_{os.path.splitext(filename)[0]}.txt"
             download_path = os.path.join(app.config['DOWNLOAD_FOLDER'], redacted_filename)
             with open(download_path, 'w', encoding='utf-8') as f:
                 f.write(redacted_text)
 
-            # Genereer downloadlink
             download_link = f"/download/{redacted_filename}"
-
             return jsonify({
                 'redacted_result': 'File processed successfully.',
                 'download_link': download_link
             })
-
         except Exception as e:
-            # Log de exceptie
-            print(f"Internal server error: {e}")
+            print(f"Error processing file: {e}")
             return jsonify({'error': 'An internal error occurred while processing the file.'}), 500
         finally:
-            # Ruim het originele geüploade bestand op
             if os.path.exists(upload_path):
                 os.remove(upload_path)
-    else:
-        return jsonify({'error': 'File type not allowed.'}), 400
+
+    return jsonify({'error': 'No text or file input provided.'}), 400
 
 @app.route('/download/<filename>')
 def download_file(filename):
