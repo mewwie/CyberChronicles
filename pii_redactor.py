@@ -7,7 +7,9 @@ fake = Faker()
 def redact_pii(text, chat_id):
     """
     Redacts PII from the given text and logs any errors.
+    Returns a tuple of (redacted_text, has_error).
     """
+    has_error = False
     try:
         # Redact email addresses
         text = re.sub(r'\S+@\S+', lambda m: f"<{fake.email().split('@')[0]}>", text)
@@ -16,6 +18,7 @@ def redact_pii(text, chat_id):
             f"Chat ID: {chat_id} - Placeholder: email - "
             f"Error: {e} - Cause: Failed to generate or substitute email placeholder."
         )
+        has_error = True
 
     try:
         # Redact phone numbers
@@ -25,6 +28,7 @@ def redact_pii(text, chat_id):
             f"Chat ID: {chat_id} - Placeholder: phone_number - "
             f"Error: {e} - Cause: Failed to generate or substitute phone number placeholder."
         )
+        has_error = True
 
     try:
         # Redact names (simple approach)
@@ -36,5 +40,6 @@ def redact_pii(text, chat_id):
             f"Chat ID: {chat_id} - Placeholder: name - "
             f"Error: {e} - Cause: Failed to generate or substitute name placeholder."
         )
+        has_error = True
 
-    return text
+    return text, has_error

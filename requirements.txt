@@ -1,1 +1,5 @@
 Faker==18.4.0
+Flask==2.2.2
+pypdf==3.15.0
+python-docx==0.8.11
+Werkzeug==2.3.8
