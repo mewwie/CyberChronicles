@@ -1,7 +1,7 @@
 # backend/redactor.py
 import re
 
-def redact_pii(text):
+def redact_text(text):
     """
     A simple PII redactor.
     This is a placeholder and should be replaced with a more robust implementation.

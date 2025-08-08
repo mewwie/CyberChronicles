@@ -8,11 +8,23 @@
 </head>
 <body>
     <h1>PII Redactor</h1>
-    <textarea id="input-text" rows="10" cols="50" placeholder="Paste your text here..."></textarea>
-    <br>
-    <button id="redact-btn">Redact Text</button>
-    <h2>Redacted Output:</h2>
-    <pre id="output-text"></pre>
+
+    <h2>Redact from Text</h2>
+    <form id="text-form">
+        <textarea name="text" rows="10" cols="50" placeholder="Paste your text here..."></textarea>
+        <br>
+        <button type="submit">Redact Text</button>
+    </form>
+
+    <h2>Redact from File</h2>
+    <form id="file-form" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".txt,.pdf">
+        <br>
+        <button type="submit">Redact File</button>
+    </form>
+
+    <h2>Result:</h2>
+    <div id="result-div"></div>
 
     <script src="app.js"></script>
 </body>
